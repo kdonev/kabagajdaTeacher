@@ -13,6 +13,10 @@ public class Songs : MonoBehaviour {
 
 		AbcParser parser = new AbcParser ();
 		_songs = parser.Parse (songsAsset);
+
+		SongPlayer sp = GameObject.Find ("SongPlayer").GetComponent<SongPlayer>();
+
+		sp.PlaySong (_songs [0]);
 	}
 	
 	// Update is called once per frame

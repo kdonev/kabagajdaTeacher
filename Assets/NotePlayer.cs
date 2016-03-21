@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class NotePlayer : MonoBehaviour {
 
@@ -21,6 +22,16 @@ public class NotePlayer : MonoBehaviour {
 		new bool[] { true , false, false, false, false, false, false, false, false, false },   // A
 	};
 
+	private static readonly string[] Notes = {"G,", "A,", "B,", "C", "D", "E", "F", "F#", "G", "A"};
+
+	private static readonly Dictionary<string, int> NotesMap = new Dictionary<string, int>();
+
+	static NotePlayer()
+	{
+		for (int i = 0; i < Notes.Length; ++i)
+			NotesMap.Add (Notes [i], i);
+	}
+
 	private HandController _leftHand;
 	private HandController _rightHand;
 
@@ -28,6 +39,15 @@ public class NotePlayer : MonoBehaviour {
 	void Start () {
 		_leftHand = GameObject.Find ("LeftHand").GetComponent<HandController>();
 		_rightHand = GameObject.Find ("RightHand").GetComponent<HandController>();
+	}
+
+	public void PlayNote(string note)
+	{
+		int noteIdx;
+		if (NotesMap.TryGetValue (note, out noteIdx))
+		{
+			Note = noteIdx;
+		}
 	}
 	
 	// Update is called once per frame
