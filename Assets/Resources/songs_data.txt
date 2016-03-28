@@ -1,13 +1,44 @@
 I:abc-charset utf-8
 L:1/8
 X:1
+T:Intro
+M:2/4
+Q:1/4=52
+K:
+DA3 | F E D2 | A2 D2
+
+X:2
 T:На мене ли си Русо, сордна и гневна
 M:2/4
 Q:1/4=52
 K:
 (GA3)|(A3G)|(G3F)|(AG) ((3FEC)|D2E2|F4|
-w:На_  ме_   не_   ли_   си,__ Ру-со, сорд
+w:На_  ме-_  не_   ли_   си,__ Ру-со, сорд
 G2A2|(A3G)|(G4|D4)|(GA3)|(A3G)|(G3F)|
-w:на и гнев_ на,_   на_   ме_   не_
+w:на и гнев-_ на,_   на_   ме-_  не_
 (AG) ((3FEC)|D2E2|(F3E)|G2 (GC)|D4|D4:|
 w:ли_ си,__ Ру-со, и_   ли  на_ се-ло
+
+X:3
+T:Сюита "Отишол ми е караджа"
+M:2/4
+L:1/4
+K:
+N: Отишол ми е караджа
+CD|DG|A2|DG|A2|AG|FG|(F3/E/)|GD|D2|
+CD|DG|A2|DG|A2|AG|FG|(F3/E/)|GD|D2|
+N: Отсвир
+AG|FG|(F3/E/)|GD|D2|AG|FG|(F3/E/)|GD|D2:|
+N: Рипни Калинке
+|:AA/A/|GF|AA|GF|AA|FG|FD|DD:|
+|:GG|FD|GG|FD|F(G/F/)|AA|FD|DD:|
+|:AA/A/|GF|AA|GF|AA|FG|FD|DD:|
+|:GG|FD|GG|FD|F(G/F/)|AA|FD:DD:|
+N: Отишла ми е Станина майка
+|:(^F/G/)A|G2|^FA|EE|D2|(G/^F/) (E/D/)|
+(^F/G/)A|G2|^FA|EE|D2|DD:|
+N: Покачила се Тудора
+|:AG/^F/|GA|A2|(G/^F/) (E/D/)|AG/^F/|GA|A2|(G/^F/) (E/D/)|
+AG/^F/|AE|D2|E^F|AG/^F/|AE|D2|DD:|
+(^F/G/)A|(G/^F/) (E/D/)|(^F/G/)A|(G/^F/) (E/D/)|^FE|D2|E^F|^FE|D2|DD|
+(^F/G/)A|(G/^F/)(E/D/)|(^F/G/)A|(G/^F/)(E/D/)|^FE|D2|E^F|^FE|D2|DD|

@@ -12,6 +12,10 @@ namespace abcNotes
 		private string _currentLine;
 		private int _lineIdx;
 
+		private int _multiplet = 0;
+		private int _multipletIdx = 0;
+		private float _multipletNoteLen;
+
 		AbcHeader _header;
 
 		AbcHeader _currentHeader;
@@ -111,9 +115,38 @@ namespace abcNotes
 			{
 				char ch = PeakNextChar();
 				if ((ch >= 'A' && ch <= 'G') ||
-				    (ch >= 'a' && ch <= 'g'))
+				    (ch >= 'a' && ch <= 'g') ||
+					(ch == '^'))
 				{
 					ParseNote ();
+				}
+				else if (ch == '(')
+				{
+					GetNextChar ();
+					ch = PeakNextChar ();
+					if (ch >= '2' && ch <= '9')
+					{
+						_multiplet = ch - '0';
+						_multipletIdx = 0;
+						switch (_multiplet)
+						{
+						case 2:
+							_multipletNoteLen = _currentHeader.UnitNoteLength * 3F / 2F;
+							break;
+
+						case 3:
+							_multipletNoteLen = _currentHeader.UnitNoteLength * 2F / 3F;
+							break;
+
+						case 4:
+							_multipletNoteLen = _currentHeader.UnitNoteLength * 3F / 4F;
+							break;
+
+						default:
+							Debug.Log ("Unsupported multiplet");
+							break;
+						}
+					}
 				}
 				else
 				{
@@ -135,7 +168,15 @@ namespace abcNotes
 			_currentNote.length = _currentTune.UnitNoteLength;
 			_currentNote.beamWithNext = true;
 
-			string note = new string(GetNextChar (), 1);
+			string note = "";
+			char nc = GetNextChar ();
+			if (nc == '^')
+			{
+				note = "#";
+				nc = GetNextChar ();
+			}
+			
+			note = note + nc;
 
 			char nextCh = PeakNextChar ();
 			if (nextCh == ',' || nextCh == '\'')
@@ -168,6 +209,14 @@ namespace abcNotes
 				{
 					_currentNote.length /= 2;
 				}
+			}
+
+			if (_multiplet > 0)
+			{
+				_currentNote.length = _multipletNoteLen;
+				++_multipletIdx;
+				if (_multipletIdx == _multiplet)
+					_multiplet = 0;
 			}
 		}
 
@@ -223,6 +272,14 @@ namespace abcNotes
 			case 'T':
 				ParseT ();
 				break;
+
+			case 'Q':
+				ParseQ ();
+				break;
+
+			case 'w':
+				Parsew ();
+				break;
 			}
 		}
 
@@ -230,6 +287,80 @@ namespace abcNotes
 		{
 			_currentTune = null;
 			_currentHeader = null;
+		}
+
+		void SkipSpaces ()
+		{
+			while (PeakNextChar () == ' ')
+				GetNextChar ();
+		}
+
+		string ParseSylable()
+		{
+			string result = "";
+
+			SkipSpaces ();
+
+			char ch = GetNextChar ();
+			switch (ch)
+			{
+			case '-':
+				return "-";
+
+			case '\0':
+				return "";
+
+			case '_':
+				return "_";
+
+			case '*':
+				return "*";
+			}
+
+			result += ch;
+
+			while (true)
+			{
+				ch = PeakNextChar ();
+			
+				if (ch == '_' || ch == '*')
+					result += ' ';
+
+				if (ch == '\0' || ch == '_' || ch == '*')
+					break;
+
+				if (ch == '~')
+					result += ' ';
+				else if (ch != '-')
+				    result += ch;
+
+				GetNextChar ();
+
+				if (ch == ' ' || ch == '-')
+					break;
+			}
+
+			return result;
+				
+		}
+
+		void Parsew()
+		{
+			if (_currentTuneLine == null)
+				return;
+
+			GetFieldParam ();
+
+			int noteIdx = 0;
+			while (noteIdx < _currentTuneLine.NotesCount)
+			{
+				string syl = ParseSylable ();
+				if (syl == "")
+					break;
+				
+				_currentTuneLine [noteIdx].lyrics = syl;
+				++noteIdx;
+			}
 		}
 
 		void ParseT()
@@ -251,9 +382,41 @@ namespace abcNotes
 			_currentHeader = newTune;
 		}
 
+		void ParseQ()
+		{
+			if (_currentHeader == null)
+				return;
+			
+			GetFieldParam ();
+
+			float fr = ParseFraction ();
+			if (GetNextChar () == '=')
+			{
+				int bpm = ParseInt ();
+
+				_currentHeader.NotesPerMinute = fr * bpm;
+			}
+		}
+
 		string GetFieldParam()
 		{
-			return _currentLine.Substring (2).Trim ();
+			_lineIdx = 0;
+			_currentLine = _currentLine.Substring (2).Trim ();
+			return _currentLine;
+		}
+
+		float ParseFraction()
+		{
+			int nom = ParseInt ();
+			int denom = 1;
+
+			if (PeakNextChar () == '/')
+			{
+				GetNextChar ();
+				denom = ParseInt ();
+			}
+
+			return (float)nom / (float)denom;
 		}
 
 		void ParseL()
@@ -261,15 +424,8 @@ namespace abcNotes
 			if (_currentHeader == null)
 				return;
 			
-			string fieldParam = GetFieldParam ();
-
-			if (fieldParam.StartsWith ("1/")) {
-				int l = int.Parse (fieldParam.Substring (2));
-
-				float noteLength = 1F / (float)l;
-
-				_currentHeader.UnitNoteLength = noteLength;
-			}
+			GetFieldParam ();
+			_currentHeader.UnitNoteLength = ParseFraction ();
 		}
 	}
 }

@@ -7,6 +7,7 @@ public class NotePlayer : MonoBehaviour {
 	public int Note;
 
 	private int _lastNote;
+	private int _newNote;
 
 	private static readonly bool[][] FingerPositions = {
 		//            R F1   R F2   R F3   R F4   R F5   L F1   L F2   L F3   L F4   L F5
@@ -22,7 +23,9 @@ public class NotePlayer : MonoBehaviour {
 		new bool[] { true , false, false, false, false, false, false, false, false, false },   // A
 	};
 
-	private static readonly string[] Notes = {"G,", "A,", "B,", "C", "D", "E", "F", "F#", "G", "A"};
+	private static readonly string[] Notes =  {"G,", "A,", "B,", "C", "D", "E", "F", "#F", "G", "A"};
+	public static readonly string[] RealNotes = {"_A", "_B", "_#C", "D", "E", "#F", "G", "#G", "A", "B" };
+	private static readonly int[] NotesDiff =   { -7  , -5  , -3  , -2 ,  0 ,  2 ,  3 ,  4  ,  5 ,  7 };
 
 	private static readonly Dictionary<string, int> NotesMap = new Dictionary<string, int>();
 
@@ -47,15 +50,34 @@ public class NotePlayer : MonoBehaviour {
 		if (NotesMap.TryGetValue (note, out noteIdx))
 		{
 			Note = noteIdx;
+			_newNote = noteIdx;
+
+			AudioSource a = GetComponent<AudioSource> ();
+			a.Stop ();
+			a.pitch = Mathf.Pow (2, (float)(NotesDiff [noteIdx] - 2) / 12F);
+			a.Play ();
 		}
 	}
 	
 	// Update is called once per frame
 	void Update () {
-		if (Note != _lastNote) {
-			_lastNote = Note;
+		int playNote = -1;
+		if (_newNote == _lastNote)
+		{
+			playNote = 0;
+			_lastNote = 0;
+		}
+		else if (_newNote >= 0)
+		{
+			playNote = _newNote;
+			_lastNote = _newNote;
+			_newNote = -1;
+		}
 
-			int n = Note;
+		if (playNote >= 0) {
+			_lastNote = playNote;
+
+			int n = playNote;
 
 			_rightHand.f1Up = FingerPositions [n] [0];
 			_rightHand.f2Up = FingerPositions [n] [1];
