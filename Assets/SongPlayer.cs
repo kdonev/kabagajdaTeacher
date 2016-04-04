@@ -9,6 +9,7 @@ public class SongPlayer : MonoBehaviour {
 	NotePlayer _notePlayer;
 	Text _noteLabel;
 	Text _lyricsLabel;
+	Text _playButton;
 
 	AbcTune _song;
 
@@ -18,6 +19,8 @@ public class SongPlayer : MonoBehaviour {
 	bool _playing = false;
 	bool _repeat = true;
 	bool _finished = false;
+
+	bool _repeateFragment = true;
 
 	float _timeForNextNote;
 
@@ -30,6 +33,7 @@ public class SongPlayer : MonoBehaviour {
 		_notePlayer = GameObject.Find ("NotePlayer").GetComponent<NotePlayer>();
 		_noteLabel = GameObject.Find ("CurrentNote").GetComponent<Text>();
 		_lyricsLabel = GameObject.Find ("LyricsText").GetComponent<Text>();
+		_playButton = GameObject.Find ("PlayButton").GetComponentInChildren<Text> ();
 	}
 
 	public void PlaySong (AbcTune song)
@@ -39,10 +43,8 @@ public class SongPlayer : MonoBehaviour {
 		_noteIdx = 0;
 		_finished = false;
 
-		EventSystem.current.SetSelectedGameObject (this.gameObject);
-		GUI.SetNextControlName ("");
-		GUI.FocusControl ("");
-		GUIUtility.keyboardControl = 0;
+		// GUI.FocusControl ("PlayButton");
+		EventSystem.current.SetSelectedGameObject (GameObject.Find ("PlayButton"));
 	}
 	
 	// Update is called once per frame
@@ -55,13 +57,20 @@ public class SongPlayer : MonoBehaviour {
 
 		if (Input.GetKeyDown (KeyCode.Space))
 		{
-			_playing = !_playing;
+			TogglePlay ();
+		}
+	}
 
-			if (_finished)
-			{
-				_playing = true;
-				RestartSong ();
-			}
+	public void TogglePlay()
+	{
+		_playing = !_playing;
+
+		_playButton.text = _playing ? "Pause" : "Play";
+
+		if (_finished)
+		{
+			_playing = true;
+			RestartSong ();
 		}
 	}
 
@@ -94,14 +103,26 @@ public class SongPlayer : MonoBehaviour {
 		_noteLabel.text = note.note;
 		_lyricsLabel.text = line.GetTextWithHighlight (_noteIdx);
 
-		++_noteIdx;
-		if (_noteIdx == line.NotesCount)
+		if (note.RepeateFromRow >= 0 && _repeateFragment)
 		{
-			_noteIdx = 0;
-			++_lineIdx;
-			if (_lineIdx == _song.LinesCount)
+			_repeateFragment = false;
+			_noteIdx = note.RepeateFromNote;
+			_lineIdx = note.RepeateFromRow;
+		}
+		else
+		{
+			if (note.RepeateFromRow >= 0)
+				_repeateFragment = true;
+			
+			++_noteIdx;
+			if (_noteIdx == line.NotesCount)
 			{
-				_finished = true;
+				_noteIdx = 0;
+				++_lineIdx;
+				if (_lineIdx == _song.LinesCount)
+				{
+					_finished = true;
+				}
 			}
 		}
 	}

@@ -16,6 +16,9 @@ namespace abcNotes
 		private int _multipletIdx = 0;
 		private float _multipletNoteLen;
 
+		private int _repeatStartRow;
+		private int _repeatStartNote;
+
 		AbcHeader _header;
 
 		AbcHeader _currentHeader;
@@ -116,7 +119,7 @@ namespace abcNotes
 				char ch = PeakNextChar();
 				if ((ch >= 'A' && ch <= 'G') ||
 				    (ch >= 'a' && ch <= 'g') ||
-					(ch == '^'))
+				    (ch == '^'))
 				{
 					ParseNote ();
 				}
@@ -146,6 +149,28 @@ namespace abcNotes
 							Debug.Log ("Unsupported multiplet");
 							break;
 						}
+					}
+				}
+				else if (ch == '|')
+				{
+					++_lineIdx;
+					ch = PeakNextChar ();
+					if (ch == ':')
+					{
+						_repeatStartRow = _currentTune.LinesCount - 1;
+						_repeatStartNote = _currentTuneLine.NotesCount;
+						++_lineIdx;
+					}
+				}
+				else if (ch == ':')
+				{
+					++_lineIdx;
+					ch = PeakNextChar ();
+					if (ch == '|')
+					{
+						_currentNote.RepeateFromRow = _repeatStartRow;
+						_currentNote.RepeateFromNote = _repeatStartNote;
+						++_lineIdx;
 					}
 				}
 				else
@@ -380,6 +405,9 @@ namespace abcNotes
 
 			_currentTune = newTune;
 			_currentHeader = newTune;
+
+			_repeatStartRow = 0;
+			_repeatStartNote = 0;
 		}
 
 		void ParseQ()

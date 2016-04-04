@@ -10,6 +10,9 @@ namespace abcNotes
 		public bool beamWithNext;
 
 		public string lyrics;
+
+		public int RepeateFromRow = -1;
+		public int RepeateFromNote = -1;
 	}
 }
 
